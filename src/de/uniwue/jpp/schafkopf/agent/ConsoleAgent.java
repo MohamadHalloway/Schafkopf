@@ -1,0 +1,242 @@
+package de.uniwue.jpp.schafkopf.agent;
+
+import de.uniwue.jpp.schafkopf.deck.Card;
+import de.uniwue.jpp.schafkopf.deck.Suit;
+import de.uniwue.jpp.schafkopf.game.Contract;
+import de.uniwue.jpp.schafkopf.game.Player;
+import de.uniwue.jpp.schafkopf.game.Trick;
+import de.uniwue.jpp.schafkopf.game.modes.GameMode;
+
+import java.io.*;
+import java.util.*;
+
+public class ConsoleAgent implements Player, Agent {
+
+    private String name;
+    private List<Card> hand;
+    OutputStream out;
+    InputStream in;
+    BufferedReader reader;
+    PrintStream print;
+
+    public ConsoleAgent(String name, OutputStream out, InputStream in) {
+        this.name = name;
+        this.out = out;
+        this.in = in;
+        this.reader = new BufferedReader(new InputStreamReader(in));
+        this.print = new PrintStream(out);
+    }
+
+
+    @Override
+    public void contractDeclared(Player byPlayer, Contract contract) {
+        print.println(byPlayer.name() + " declared " + contract.toString());
+
+    }
+
+    @Override
+    public void gameModeDetermined(Player byPlayer, Contract contract) {
+        print.println(byPlayer.name() + " got priority. Game mode is: " + contract.mode());
+    }
+
+    @Override
+    public void winnerDetermined(Collection<Player> winners, int points) {
+        if (winners.size() == 1) {
+            Iterator<Player> iterator = winners.iterator();
+            print.println(iterator.next().name() + " wins this game with " + points + " points");
+        } else {
+            print.println("Team " + winners.toString() + " wins this game with " + points + " points");
+
+        }
+    }
+
+    @Override
+    public boolean continueGame() {
+        print.println("Continue playing? (y/N)");
+        String result;
+        try {
+            result = reader.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        if (result.equals("y")) return true;
+        else {
+            return false;
+        }
+    }
+
+    @Override
+    public void cardPlayed(Card card, Player player) {
+        print.println(player.name() + " plays " + card.toString());
+    }
+
+    @Override
+    public void trickTaken(Trick trick, Player player) {
+        print.println("Trick goes to " + player.name());
+    }
+
+    @Override
+    public String name() {
+        return this.name;
+    }
+
+    @Override
+    public List<Card> hand() {
+        return this.hand;
+    }
+
+    @Override
+    public void receive(List<Card> hand) {
+        this.hand = hand;
+    }
+
+    @Override
+    public Card play(GameMode mode, Trick trick) {
+        print.println("Your hand: " + hand.toString());
+        printOutEnumeration(hand.size());
+//        for (String string : printOutEnumeration(hand.size())) {
+//            print.print(string);
+//        }
+        print.println();
+        System.out.println("Enter number of card to play:");
+        String result;
+        try {
+            result = reader.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        try {
+            Card playedCard = hand.get(Integer.parseInt(result));
+            //updating the hand after playing a card
+            List<Card> newHand = new ArrayList<>();
+            for (Card card : hand) {
+                if (!card.equals(playedCard)) newHand.add(card);
+            }
+            receive(newHand);
+            return playedCard;
+        } catch (Exception e) {
+            return null;
+        }
+
+
+
+
+//        ArrayList<Card> preHand = new ArrayList<>(hand);
+//
+//        Collections.sort(preHand, mode.comparator()); //sorting the hand
+//        Card result = preHand.get(0);
+//        boolean breaked = false;
+//        for (Card card : preHand) {       //the result is the strongest valid play card
+//            if (mode.isValidPlay(trick, card, preHand)) {
+//                result = card;
+//                breaked = true;
+//                break;
+//            }
+//        }
+//        if(!breaked) throw new IllegalStateException();
+//        preHand.remove(result);
+//        this.receive(preHand);
+//
+//        return result;
+
+    }
+
+    @Override
+    public Contract declare(List<Contract> previous) {
+        print.print("Your hand: " + hand + "\n");
+        print.print("(0) Pass\n" +
+                "(1-3) Call (1) Eichel (2) Gras (3) Schellen\n" +
+                "(4) Wenz\n" +
+                "(5-8) Solo (5) Eichel (6) Gras (7) Herz (8) Schellen\n" +
+                "Enter number to declare:");
+        String result;
+        try {
+            result = reader.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+        switch (Integer.parseInt(result)) {
+            case (1):
+                return Contract.call(Suit.Eichel);
+            case (2):
+                return Contract.call(Suit.Gras);
+
+            case (3):
+                return Contract.call(Suit.Schellen);
+            case (4):
+                String temp = "";
+                print.println("Declare Tout? (y/N)");
+                try {
+                    temp = reader.readLine();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                if (temp.equals("y")) return Contract.wenz(true);
+                else return Contract.wenz(false);
+            case (5):
+                String temp1 = "";
+                print.println("Declare Tout? (y/N)");
+                try {
+                    temp1 = reader.readLine();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                if (temp1.equals("y")) return Contract.solo(true, Suit.Eichel);
+                else return Contract.solo(false, Suit.Eichel);
+            case (6):
+                String temp2 = "";
+                print.println("Declare Tout? (y/N)");
+                try {
+                    temp2 = reader.readLine();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                if (temp2.equals("y")) return Contract.solo(true, Suit.Gras);
+                else return Contract.solo(false, Suit.Gras);
+            case (7):
+                String temp3 = "";
+                print.println("Declare Tout? (y/N)");
+                try {
+                    temp3 = reader.readLine();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                if (temp3.equals("y")) return Contract.solo(true, Suit.Herz);
+                else return Contract.solo(false, Suit.Herz);
+            case (8):
+                String temp4 = "";
+                print.println("Declare Tout? (y/N)");
+                try {
+                    temp4 = reader.readLine();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                if (temp4.equals("y")) return Contract.solo(true, Suit.Schellen);
+                else return Contract.solo(false, Suit.Schellen);
+            default:
+                return Contract.pass();
+        }
+    }
+
+    public void printOutEnumeration(int handSize) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("           ");
+//        List<String> numbers = new ArrayList<>();
+        for (int i = 0; i < handSize; i++) {
+            sb.append(" (" + i + ")");
+        }
+        print.print(sb);
+//        for (String string : numbers) {
+//            System.out.print(string + " ");
+//        }
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
+}

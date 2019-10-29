@@ -6,4 +6,4 @@ Schafkopf wird mit vier Spielern mit je acht Karten, also 32 Karten insgesamt ge
 
 Gespielt wird nach den Regeln des Bayerischen Schafkopfverbandes oder der Schafkopfschule, wie sie im Internet zugänglich ist.
 
-Anmerkung: Das Programm hat keine grafische Oberfläche. Ausßerdem ist noch wirft das Programm ein Exception falls der zug nicht nach den Regeln gespielt wird!
+Anmerkung: Das Programm hat keine grafische Oberfläche. Ausßerdem wirft das Programm ein Exception falls der zug nicht nach den Regeln gespielt wird!
